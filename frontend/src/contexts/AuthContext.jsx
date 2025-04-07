@@ -16,8 +16,8 @@ const AuthContext = createContext(null);
  */
 export const AuthProvider = ({ children }) => {
     const navigate = useNavigate();
-    const [localStorage, setLocalStorage] = useState({});
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState(localStorage.getItem("user"));
+    const [loggedin, setLoggedIn] = useState(false);
 
 
     useEffect(() => {
@@ -39,10 +39,10 @@ export const AuthProvider = ({ children }) => {
                 console.error(error.message);
               }
             }
-            if (localStorage.token) {
+            if (localStorage.getItem("token")) {
                 fetchData();
             }
-    }, [localStorage]);
+    }, [loggedin]);
 
     /*
      * Logout the currently authenticated user.
@@ -50,7 +50,8 @@ export const AuthProvider = ({ children }) => {
      * @remarks This function will always navigate to "/".
      */
     const logout = () => {
-        setLocalStorage({});
+        localStorage.setItem("user", null);
+        localStorage.setItem("token", null);
         setUser(null);
         navigate("/");
     };
@@ -78,9 +79,8 @@ export const AuthProvider = ({ children }) => {
         
             const data = await response.json();
             console.log(data);
-            setLocalStorage({
-                token: data.token,
-            })
+            localStorage.setItem("token", data.token);
+            setLoggedIn(true);
             navigate('/profile');
           } catch (error) {
             console.error(error.message);
